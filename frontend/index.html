@@ -32,10 +32,11 @@
   </div>
 
   <script>
+    const backendBaseUrl = "https://travelfrom.onrender.com";
+
     function showCustomFields() {
       const type = document.getElementById('tripType').value;
-      let fields = '';
-      let activities = '';
+      let fields = '', activities = '';
       if (type === 'friends') {
         fields = `
           <input type="text" name="groupLeader" placeholder="Group Leader Name" class="w-full px-4 py-2 border rounded focus:ring mt-2"/>
@@ -86,13 +87,12 @@
       document.getElementById('activitiesFields').innerHTML = activities;
     }
 
-    // Already registered check (demo: could use API check instead)
+    // Already registered check (calls the Render backend)
     document.getElementById('email').addEventListener('change', async function() {
       const email = this.value.toLowerCase();
       if (!email) return;
-      // Demo: replace this section with backend API if needed
       try {
-        const res = await fetch(`http://localhost:5000/api/travel/check?email=${encodeURIComponent(email)}`);
+        const res = await fetch(`${backendBaseUrl}/api/travel/check?email=${encodeURIComponent(email)}`);
         if (res.status === 200) {
           document.getElementById('travelForm').reset();
           document.getElementById('alreadyRegisteredMsg').style.display = 'block';
@@ -127,7 +127,7 @@
       });
 
       try {
-        const response = await fetch('http://localhost:5000/api/travel', {
+        const response = await fetch(`${backendBaseUrl}/api/travel`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(data),

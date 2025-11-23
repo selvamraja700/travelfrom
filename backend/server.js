@@ -6,24 +6,67 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Use this CORS configuration for production—replace with your real Netlify URL, no trailing slash!
+// CORS configuration for Netlify production
 app.use(cors({
-  origin: ["https://stirring-mooncake-f055fc.netlify.app"], // Whitelist Netlify site
+  origin: ["https://stirring-mooncake-f055fc.netlify.app"],
   methods: ["GET", "POST"],
   credentials: true
 }));
 
 app.use(express.json());
 
-// ...mongoose and schema definition remain unchanged...
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// Your API routes here (keep as-is)
+// Mongoose schema
+const travelSchema = new mongoose.Schema({
+  name: String,
+  email: { type: String, unique: true },
+  tripType: String,
+  destination: String,
+  travellers: Number,
+  budget: Number,
+  groupLeader: String,
+  preferences: String,
+  children: Number,
+  specialNeeds: String,
+  anniversary: Date,
+  romanticPreferences: String,
+}, { timestamps: true });
+
+const Travel = mongoose.model('Travel', travelSchema);
+
+// API routes
 app.post('/api/travel', async (req, res) => {
-  // ...unchanged...
+  const { email } = req.body;
+  try {
+    const existing = await Travel.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      return res.status(400).json({ message: 'You have already submitted your travel details.' });
+    }
+    const newTravel = new Travel(req.body);
+    await newTravel.save();
+    res.json({ message: 'Trip details stored successfully!' });
+  } catch (error) {
+    console.error('Error saving travel data:', error);
+    res.status(500).json({ message: 'Server error saving trip details.' });
+  }
 });
 
 app.get('/api/travel/check', async (req, res) => {
-  // ...unchanged...
+  const email = req.query.email?.toLowerCase();
+  if (!email) return res.status(400).json({ message: 'Email is required' });
+  try {
+    const existing = await Travel.findOne({ email });
+    if (existing) return res.sendStatus(200);
+    res.sendStatus(404);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.listen(PORT, () => {
