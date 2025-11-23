@@ -6,10 +6,10 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS configuration for Netlify production
+// CORS: allow ONLY your Netlify app (no trailing slash)
 app.use(cors({
-  origin: ["https://stirring-mooncake-f055fc.netlify.app"],
-  methods: ["GET", "POST"],
+  origin: "https://stirring-mooncake-f055fc.netlify.app",
+  methods: ["GET", "POST", "OPTIONS"],
   credentials: true
 }));
 
@@ -40,7 +40,7 @@ const travelSchema = new mongoose.Schema({
 
 const Travel = mongoose.model('Travel', travelSchema);
 
-// API routes
+// POST: Add new trip if not already registered
 app.post('/api/travel', async (req, res) => {
   const { email } = req.body;
   try {
@@ -57,6 +57,7 @@ app.post('/api/travel', async (req, res) => {
   }
 });
 
+// GET: Check email for already registered user
 app.get('/api/travel/check', async (req, res) => {
   const email = req.query.email?.toLowerCase();
   if (!email) return res.status(400).json({ message: 'Email is required' });
