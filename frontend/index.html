@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Custom Travel Registration Form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 flex items-center justify-center min-h-screen px-4">
+  <div class="w-full max-w-lg bg-white p-8 rounded-xl shadow">
+    <h2 class="text-2xl font-bold mb-6 text-blue-700">Travel Details Form</h2>
+    <div id="alreadyRegisteredMsg" class="hidden p-4 mb-4 text-red-900 bg-red-200 rounded">
+      You have already registered for a trip.<br>
+      If you need to update details, please contact support!
+    </div>
+    <form id="travelForm" class="space-y-4">
+      <input type="email" id="email" name="email" required placeholder="Email Address" class="w-full px-4 py-2 border rounded focus:ring" />
+      <input type="text" name="name" required placeholder="Your Name" class="w-full px-4 py-2 border rounded focus:ring" />
+      <select name="tripType" id="tripType" required class="w-full px-4 py-2 border rounded focus:ring" onchange="showCustomFields()">
+        <option value="">Choose Trip Type</option>
+        <option value="friends">Friends</option>
+        <option value="family">Family</option>
+        <option value="couple">Couple/Honeymoon</option>
+      </select>
+      <input type="text" name="destination" required placeholder="Destination" class="w-full px-4 py-2 border rounded focus:ring" />
+      <input type="number" name="travellers" required min="1" placeholder="Number of Travellers" class="w-full px-4 py-2 border rounded focus:ring" />
+      <input type="number" name="budget" required min="1" placeholder="Budget (₹)" class="w-full px-4 py-2 border rounded focus:ring" />
+      <div id="customFields"></div>
+      <div id="activitiesFields"></div>
+      <button type="submit" id="submitBtn" class="w-full py-2 px-4 bg-blue-700 text-white rounded hover:bg-blue-800">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    function showCustomFields() {
+      const type = document.getElementById('tripType').value;
+      let fields = '';
+      let activities = '';
+      if (type === 'friends') {
+        fields = `
+          <input type="text" name="groupLeader" placeholder="Group Leader Name" class="w-full px-4 py-2 border rounded focus:ring mt-2"/>
+          <input type="number" name="ageRange" min="12" max="70" placeholder="Age Range of Group (e.g. 18-25)" class="w-full px-4 py-2 border rounded focus:ring mt-2"/>
+        `;
+        activities = `
+          <label class="block mt-2 mb-1 font-semibold">Preferred Activities (select multiple):</label>
+          <div class="flex flex-wrap gap-2">
+            <label><input type="checkbox" name="activities" value="Adventure" /> Adventure</label>
+            <label><input type="checkbox" name="activities" value="Nightlife" /> Nightlife</label>
+            <label><input type="checkbox" name="activities" value="Beach" /> Beach</label>
+            <label><input type="checkbox" name="activities" value="Trek" /> Trek</label>
+            <label><input type="checkbox" name="activities" value="Food" /> Food Tour</label>
+          </div>
+        `;
+      } else if (type === 'family') {
+        fields = `
+          <input type="number" name="children" min="0" placeholder="Number of Children" class="w-full px-4 py-2 border rounded focus:ring mt-2"/>
+          <input type="text" name="familyRelation" placeholder="Relationship (e.g. Parents, Siblings)" class="w-full px-4 py-2 border rounded focus:ring mt-2"/>
+        `;
+        activities = `
+          <label class="block mt-2 mb-1 font-semibold">Family Activities (select multiple):</label>
+          <div class="flex flex-wrap gap-2">
+            <label><input type="checkbox" name="activities" value="Sightseeing" /> Sightseeing</label>
+            <label><input type="checkbox" name="activities" value="Theme Park" /> Theme Park</label>
+            <label><input type="checkbox" name="activities" value="Zoo" /> Zoo/Safari</label>
+            <label><input type="checkbox" name="activities" value="Water Park" /> Water Park</label>
+            <label><input type="checkbox" name="activities" value="Cultural" /> Cultural Program</label>
+          </div>
+        `;
+      } else if (type === 'couple') {
+        fields = `
+          <input type="date" name="anniversary" class="w-full px-4 py-2 border rounded focus:ring mt-2"/>
+          <input type="text" name="coupleRelation" placeholder="Relationship (e.g. Newlyweds, Dating)" class="w-full px-4 py-2 border rounded focus:ring mt-2"/>
+        `;
+        activities = `
+          <label class="block mt-2 mb-1 font-semibold">Romantic/Honeymoon Activities:</label>
+          <div class="flex flex-wrap gap-2">
+            <label><input type="checkbox" name="activities" value="Candlelight Dinner" /> Candlelight Dinner</label>
+            <label><input type="checkbox" name="activities" value="Beachside Walk" /> Beachside Walk</label>
+            <label><input type="checkbox" name="activities" value="Spa" /> Couples' Spa</label>
+            <label><input type="checkbox" name="activities" value="Photo Tour" /> Photo Tour</label>
+            <label><input type="checkbox" name="activities" value="Private Event" /> Private Event/Surprise</label>
+          </div>
+        `;
+      }
+      document.getElementById('customFields').innerHTML = fields;
+      document.getElementById('activitiesFields').innerHTML = activities;
+    }
+
+    // Already registered check (demo: could use API check instead)
+    document.getElementById('email').addEventListener('change', async function() {
+      const email = this.value.toLowerCase();
+      if (!email) return;
+      // Demo: replace this section with backend API if needed
+      try {
+        const res = await fetch(`http://localhost:5000/api/travel/check?email=${encodeURIComponent(email)}`);
+        if (res.status === 200) {
+          document.getElementById('travelForm').reset();
+          document.getElementById('alreadyRegisteredMsg').style.display = 'block';
+          document.getElementById('submitBtn').disabled = true;
+          Array.from(document.getElementById('travelForm').elements).forEach(el => el.disabled = true);
+        } else {
+          document.getElementById('alreadyRegisteredMsg').style.display = 'none';
+          document.getElementById('submitBtn').disabled = false;
+          Array.from(document.getElementById('travelForm').elements).forEach(el => el.disabled = false);
+        }
+      } catch {
+        document.getElementById('alreadyRegisteredMsg').style.display = 'none';
+        document.getElementById('submitBtn').disabled = false;
+        Array.from(document.getElementById('travelForm').elements).forEach(el => el.disabled = false);
+      }
+    });
+
+    document.getElementById('travelForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = {};
+      formData.forEach((val, key) => {
+        if (key === "activities") {
+          if (data.activities) {
+            data.activities.push(val);
+          } else {
+            data.activities = [val];
+          }
+        } else {
+          data[key] = val;
+        }
+      });
+
+      try {
+        const response = await fetch('http://localhost:5000/api/travel', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data),
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(result.message);
+          document.getElementById('travelForm').reset();
+          document.getElementById('alreadyRegisteredMsg').style.display = 'block';
+          document.getElementById('submitBtn').disabled = true;
+          Array.from(document.getElementById('travelForm').elements).forEach(el => el.disabled = true);
+        } else {
+          alert(result.message);
+        }
+      } catch (err) {
+        alert('Error submitting form. Please try again later.');
+      }
+    });
+  </script>
+</body>
+</html>
