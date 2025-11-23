@@ -6,9 +6,12 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS: allow ONLY your Netlify app (no trailing slash)
+// CORS: allow Netlify production frontend and localhost for development
 app.use(cors({
-  origin: "https://stirring-mooncake-f055fc.netlify.app",
+  origin: [
+    "https://stirring-mooncake-f055fc.netlify.app", // Netlify production
+    "http://localhost:3000",                        // Local development
+  ],
   methods: ["GET", "POST", "OPTIONS"],
   credentials: true,
 }));
