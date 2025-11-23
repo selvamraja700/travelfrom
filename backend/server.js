@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({
   origin: "https://stirring-mooncake-f055fc.netlify.app",
   methods: ["GET", "POST", "OPTIONS"],
-  credentials: true
+  credentials: true,
 }));
 
 app.use(express.json());
@@ -19,8 +19,9 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection error:', err));
 
 // Mongoose schema
 const travelSchema = new mongoose.Schema({
